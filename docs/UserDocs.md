@@ -7,13 +7,19 @@ In this document, you will learn how can you package your application and make a
 ## Prerequisite
 
 - pycrucible cli program
+- rust language (rustc, cargo)
 - your source code (ofcourse, what else would you make executable out of!!)
 
-you would need a pycrucible cli program that will help you package your app.
+you would need a pycrucible cli program that will help you package your app, and you will also need rust compiler for making a launcher.
 
-you download from [here](https://github.com/razorblade23/PyCrucible/releases)!!
+you download PyCrucible CLIfrom [here](https://github.com/razorblade23/PyCrucible/releases)!! and Rust tools from [here](https://www.rust-lang.org/tools/install)!!
 
 along, with you will require a source code of the application that you want to make in a executable.
+
+> [!Note]
+> Rust compiler & Cargo is a internal hidden dependency for the PyCrucible CLI.
+> CLI App need rust tools for compile and generating launcher (a.k.a executable of your program).
+> Just be sure to have them. and ensure that you can access them from anywhere.. mean your environment variables are set correctly...
 
 ## Steps (Complete Baby Step Guide)
 
