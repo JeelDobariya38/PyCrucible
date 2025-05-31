@@ -98,17 +98,17 @@ overflow-checks = false
                 )
                 .spawn()?;
             let status = child.wait()?;
-                if !status.success() {
-                    eprintln!("Failed to compile the launcher binary.");
-                    std::process::exit(1);
-                } else {
-                    // Copy the binary to the desired output location
-                    fs::copy(
-                        "payload/target/release/pycrucible-launcher",
-                        &self.config.output_path,
-                    )?;
-                    println!("Launcher binary created at: {}", self.config.output_path);
-                }
+            if !status.success() {
+                eprintln!("Failed to compile the launcher binary.");
+                std::process::exit(1);
+            } else {
+                // Copy the binary to the desired output location
+                fs::copy(
+                    "payload/target/release/pycrucible-launcher",
+                    &self.config.output_path,
+                )?;
+                println!("Launcher binary created at: {}", self.config.output_path);
+            }
         } else {
             let mut child = Command::new("cargo")
                 .arg("build")
