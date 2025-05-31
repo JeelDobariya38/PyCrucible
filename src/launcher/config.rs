@@ -1,4 +1,3 @@
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
 // use std::fs::File;
@@ -6,7 +5,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 // use tempfile::tempdir;
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct FilePatterns {
     #[serde(default)]
     pub include: Vec<String>,
@@ -23,31 +22,31 @@ impl Default for FilePatterns {
     }
 }
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct PackageConfig {
     pub entrypoint: String,
     #[serde(default)]
     pub patterns: FilePatterns,
 }
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct UVConfig {
     pub args: Option<Vec<String>>,
 }
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct EnvConfig {
     #[serde(flatten)]
     pub variables: HashMap<String, String>,
 }
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Hooks {
     pub pre_run: Option<String>,
     pub post_run: Option<String>,
 }
 
-#[derive(serde::Serialize, Debug, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct ProjectConfig {
     pub package: PackageConfig,
     pub uv: Option<UVConfig>,
