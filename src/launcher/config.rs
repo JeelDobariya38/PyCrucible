@@ -1,10 +1,10 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
-use std::fs::File;
-use std::io::Write;
+// use std::fs::File;
+// use std::io::Write;
 use std::path::{Path, PathBuf};
-use tempfile::tempdir;
+// use tempfile::tempdir;
 
 #[derive(serde::Serialize, Debug, Deserialize)]
 pub struct FilePatterns {
