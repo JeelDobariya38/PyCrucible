@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
-// use std::fs::File;
-// use std::io::Write;
 use std::path::{Path, PathBuf};
-// use tempfile::tempdir;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct FilePatterns {
@@ -115,6 +112,9 @@ pub fn load_project_config(source_dir: &PathBuf) -> ProjectConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
+    use std::io::Write;
+    use tempfile::tempdir;
 
     #[test]
     fn test_project_config_default() {

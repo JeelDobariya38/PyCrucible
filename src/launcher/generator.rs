@@ -6,8 +6,6 @@ use std::process::Command;
 use zip::write::FileOptions;
 
 use super::template::LAUNCHER_TEMPLATE;
-// use std::path::PathBuf;
-// use tempfile::tempdir;
 
 pub struct LauncherGenerator<'a> {
     config: crate::BuilderConfig<'a>,
@@ -152,6 +150,8 @@ fn byte_array_literal(data: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
+    use tempfile::tempdir;
 
     #[test]
     fn test_byte_array_literal() {
