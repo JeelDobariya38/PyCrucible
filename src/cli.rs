@@ -1,6 +1,6 @@
 use clap::Parser;
-use std::path::PathBuf;
 use std::env;
+use std::path::PathBuf;
 
 const AUTHOR: &str = "razorblade23";
 const ABOUT: &str = "Tool to generate python executable by melding UV and python source code in crucible of one binary";

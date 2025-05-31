@@ -5,7 +5,6 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use tempfile::tempdir;
 
-
 #[derive(Debug, Clone)]
 pub enum CrossTarget {
     LinuxX86_64,
@@ -79,7 +78,9 @@ fn get_output_dir() -> PathBuf {
 }
 
 // Modify your download function to accept target
-pub fn download_binary_and_unpack(target: Option<CrossTarget>) -> Result<PathBuf, Box<dyn std::error::Error>> {
+pub fn download_binary_and_unpack(
+    target: Option<CrossTarget>,
+) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let artifact_name = get_architecture(target).ok_or("Unsupported platform")?;
     let base_url = "https://github.com/astral-sh/uv/releases/download/0.7.4";
     let url = format!("{}/{}", base_url, artifact_name);
@@ -132,5 +133,3 @@ pub fn download_binary_and_unpack(target: Option<CrossTarget>) -> Result<PathBuf
         Ok(output_dir.join("uv"))
     }
 }
-
-

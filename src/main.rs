@@ -12,8 +12,8 @@ use std::collections::HashSet;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use uv_handler::{CrossTarget, download_binary_and_unpack};
 use walkdir::WalkDir;
-use uv_handler::{download_binary_and_unpack, CrossTarget};
 
 use launcher::generator::LauncherGenerator;
 
@@ -125,9 +125,11 @@ fn main() -> io::Result<()> {
     stop_and_persist_spinner_with_message(sp, "Source files collected");
 
     let target = match cli.target.clone() {
-        Some(target_str) => Some(target_str.parse::<CrossTarget>().map_err(|e| {
-            io::Error::new(io::ErrorKind::InvalidInput, e)
-        })?),
+        Some(target_str) => Some(
+            target_str
+                .parse::<CrossTarget>()
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, e))?,
+        ),
         None => None,
     };
 
@@ -141,14 +143,15 @@ fn main() -> io::Result<()> {
                 stop_and_persist_spinner_with_message(sp, "UV binary downloaded");
             }
             Err(e) => {
-                stop_and_persist_spinner_with_message(sp, "✗ Failed to download UV binary. Please check your internet connection.");
+                stop_and_persist_spinner_with_message(
+                    sp,
+                    "✗ Failed to download UV binary. Please check your internet connection.",
+                );
                 eprintln!("Failed to download UV binary: {}", e);
                 std::process::exit(1);
             }
         }
     }
-    
-
 
     let config = BuilderConfig {
         source_dir: &cli.source_dir,

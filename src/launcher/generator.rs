@@ -6,8 +6,6 @@ use std::process::Command;
 use zip::write::FileOptions;
 
 use super::template::LAUNCHER_TEMPLATE;
-use std::path::PathBuf;
-use tempfile::tempdir;
 
 pub struct LauncherGenerator<'a> {
     config: crate::BuilderConfig<'a>,
@@ -100,17 +98,17 @@ overflow-checks = false
                 )
                 .spawn()?;
             let status = child.wait()?;
-                if !status.success() {
-                    eprintln!("Failed to compile the launcher binary.");
-                    std::process::exit(1);
-                } else {
-                    // Copy the binary to the desired output location
-                    fs::copy(
-                        "payload/target/release/pycrucible-launcher",
-                        &self.config.output_path,
-                    )?;
-                    println!("Launcher binary created at: {}", self.config.output_path);
-                }
+            if !status.success() {
+                eprintln!("Failed to compile the launcher binary.");
+                std::process::exit(1);
+            } else {
+                // Copy the binary to the desired output location
+                fs::copy(
+                    "payload/target/release/pycrucible-launcher",
+                    &self.config.output_path,
+                )?;
+                println!("Launcher binary created at: {}", self.config.output_path);
+            }
         } else {
             let mut child = Command::new("cargo")
                 .arg("build")
@@ -152,6 +150,8 @@ fn byte_array_literal(data: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
+    use tempfile::tempdir;
 
     #[test]
     fn test_byte_array_literal() {
