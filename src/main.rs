@@ -5,7 +5,7 @@ mod uv_handler;
 
 use crate::launcher::config::load_project_config;
 use clap::Parser;
-use cli::Cli;
+use cli::{Cli, Commands, BuildArgs};
 use glob::Pattern;
 use spinner_utils::{create_spinner_with_message, stop_and_persist_spinner_with_message};
 use std::collections::HashSet;
@@ -104,9 +104,7 @@ fn collect_source_files(source_dir: &Path) -> io::Result<Vec<SourceFile>> {
     Ok(files)
 }
 
-fn main() -> io::Result<()> {
-    let cli = Cli::parse(); // parse command line arguments
-
+fn build_launcher(cli: &BuildArgs) -> io::Result<()> {
     // Collect source files
     let sp = create_spinner_with_message("Collecting source files ...");
     let source_files = collect_source_files(&cli.source_dir)?;
@@ -159,10 +157,24 @@ fn main() -> io::Result<()> {
         manifest: fs::read(manifest_path)?,
         uv_binary: fs::read(&uv_path)?,
         output_path: cli.output_path.to_string_lossy().to_string(),
-        cross: cli.target,
+        cross: cli.target.clone(),
     };
 
     let generator = LauncherGenerator::new(config);
     generator.generate_and_compile()?;
     Ok(())
+}
+
+fn main() {
+    let cli = Cli::parse(); // parse command line arguments
+
+    match &cli.command {
+        Commands::Build(build_args) => {
+            println!("Building the app....");
+            let _ = build_launcher(&build_args).expect("Failed to build!!");
+        }
+        Commands::Quit => {
+            println!("Quit...");
+        }
+    }
 }
