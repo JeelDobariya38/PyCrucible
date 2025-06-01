@@ -1,69 +1,79 @@
-# Developer Guide To PyCrucible CLI
+# Developer Guide to PyCrucible CLI
 
-In this document, You will learn about the internal details of `PyCrucible CLI`. Here, we you will find the flow and internal logic of the Pycrucible CLI.
+In this document, you will learn about the internal workings of the `PyCrucible CLI`. This guide outlines the flow and underlying logic of how the CLI transforms your Python application into a standalone executable.
 
 ## Overview
 
-This tool runs a Python application with a help of UV binary. It extracts your package (ZIP or directory), loads an optional configuration from pycrucible.toml, and uses uv to run your app in an ephemeral environment.
+PyCrucible is a tool that runs a Python application using a UV binary. It extracts your package (as a ZIP file or directory), loads an optional configuration from `pycrucible.toml`, and uses `uv` to run your app in an ephemeral environment.
 
-- **Input:** your python application source code.
-- **Process:** wrapping process that is done using uv.
-- **Output:** a binary executable.
+* **Input:** Your Python application source code.
+* **Process:** A wrapping process handled by `uv`.
+* **Output:** A standalone binary executable.
+
+---
 
 ## Inner Flow & Magic
 
-**PyCruible CLI Building Process** takes your source code and convert your app in executable in series of step.
+The **PyCrucible CLI Build Process** takes your source code and converts it into an executable through a series of steps:
 
-### Building Process
+### Build Process
 
-1. Read the commandline arguments, as `CLI { source_dir, uv_path, output_path, target }`, underlying process is handle by `clap`.
+1. Parse the command-line arguments using `clap`, producing a `CLI` struct:
 
-2. Then, Read the pycruible.toml as `ProjectConfig { ... }` (it contains info of project).
+   ```rs
+   CLI {
+       source_dir,
+       uv_path,
+       output_path,
+       target
+   }
+   ```
 
-3. Then, starts collecting your projects source code files as `Vector of SourceFile { relative_path, content }`.
+2. Read the `pycrucible.toml` file into a `ProjectConfig` object (this contains project metadata and configuration).
 
-4. Then, we check wether the 'manifest' file exist or not & get its path.
-     - manifest file mean pyproject.toml/pylock.toml/requirements.txt
+3. Collect all source code files into a vector of `SourceFile { relative_path, content }`.
 
-5. Then, get the uv path using some complicated process & some software check, that not important of building process.
+4. Check for the existence of a *manifest* file (e.g., `pyproject.toml`, `pylock.toml`, or `requirements.txt`) and determine its path.
 
-6. Now, The real rocess starts, The program build instance of something called `BuilderConfig`.
-   
+5. Determine the `uv` binary path (involves some system checks—not critical to understand for the build process).
+
+6. Construct a `BuilderConfig` object, which aggregates all build-related data:
+
    ```rs
    BuilderConfig {
        source_dir: File_Path,
-       source_files: Vector<Source_File>,
+       source_files: Vec<Source_File>,
        manifest: Content<Manifest_File>,
        uv_binary: Content<UV_Binary>,
        output_path: File_Path,
-       cross: Optional<String>
-    };
+       cross: Option<String>
+   }
    ```
 
-7. Then, It make a instance of `LauncherGenerator` and pass this `BuilderConfig` in it.
+7. Create a `LauncherGenerator` instance and pass in the `BuilderConfig`.
 
-8. Then, starts compileing and generateing the app launcher...
+8. Begin compiling and generating the application launcher.
 
-9. It first, collect all your source code and zip it up.. and write that all in a zip fie internal object.. using `zip`.
+9. Collect all source files, zip them, and store them internally using the `zip` crate.
 
-10. Then, generate the byte array out of the zipped data. meaning, the zip file content is converted into byte array.
+10. Convert the zipped source code into a byte array.
 
-11. Then, generate the byte array out of the uv binary, meaning uv binary is conevrt as byte array.
+11. Convert the `uv` binary into a byte array.
 
-12. Here By, we have both uv binary and your source code. both, are now there as a byte array mean, we both thing represented as byte array.
+12. At this point, both your source code and the UV binary are represented as byte arrays.
 
-13. Now, we just make new cargo project in your source code. we call project "payload", the rust project is responsible for create a launcher.
+13. Create a new Cargo (Rust) project named `payload`. This Rust project is responsible for generating the launcher binary.
 
-14. The PyCrucible CLI copy the code, from the template.rs into the payload project. and setup and make the project ready for compile..
+14. Copy a launcher template (`template.rs`) into the payload project and set it up for compilation.
 
-15. Now, atlast check wether you want to compile for cross platform or for native using the cross in builderconfig.
+15. Determine whether to compile for a cross-platform target or the native platform based on the `cross` field in `BuilderConfig`.
 
-16. Then, it compile accoring to your preference, using rust compiler.
+16. Compile the project using the Rust compiler, according to your platform preferences.
 
-17. Then, it copy the output to desire location.
+17. Copy the resulting binary to the specified output location.
 
-18. Take a clean up step and delete the payload directory.
+18. Perform cleanup by deleting the temporary `payload` directory.
 
-19. And We are done believe me or not.
+19. Done! Believe it or not.
 
-20. Now, Enjoy stare-ing at success message for hrs!! and when you are satified run the pylauncher!!
+20. Now, sit back, enjoy the success message, and—when ready—run the PyLauncher!
