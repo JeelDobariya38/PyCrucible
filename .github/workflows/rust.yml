@@ -1,0 +1,58 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:        # ✅ Manual trigger support
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }} # Use the OS from the matrix
+    strategy:
+      matrix:
+        # Define the operating systems and their corresponding Rust targets
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_ext: "" # No extension for Linux binaries
+          - os: windows-latest
+            target: x86_64-pc-windows-gnu
+            binary_ext: ".exe" # .exe extension for Windows binaries
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust target
+      run: rustup target add ${{ matrix.target }} # Install the specific target for the current OS
+
+    - name: Build
+      run: cargo build --release --verbose --target ${{ matrix.target }}
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Prepare binary
+      shell: bash # Ensure bash is used for consistent scripting across OSes
+      run: |
+          # Define the base binary name from your project
+          BASE_BINARY_NAME="pycrucible"
+          # Construct the full binary name including the extension from the matrix
+          BINARY_NAME="${BASE_BINARY_NAME}${BINARY_EXT}"
+          # Define the path to the compiled binary
+          COMPILED_BINARY_PATH="target/${{ matrix.target }}/release/${BASE_BINARY_NAME}${BINARY_EXT}"
+
+          # Copy the compiled binary to the root of the workspace for easier artifact upload
+          cp "${COMPILED_BINARY_PATH}" "${BINARY_NAME}"
+
+          # Set environment variables for subsequent steps
+          echo "binary_name=${BINARY_NAME}" >> $GITHUB_ENV
+          echo "artifact_name=${BASE_BINARY_NAME}-${{ matrix.os }}" >> $GITHUB_ENV # Unique artifact name
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4.6.2
+      with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.binary_name }}
