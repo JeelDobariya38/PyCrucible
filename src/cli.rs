@@ -25,6 +25,7 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     Build(BuildArgs),
+    Clean,
     Quit,
 }
 

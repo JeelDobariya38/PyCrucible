@@ -165,16 +165,27 @@ fn build_launcher(cli: &BuildArgs) -> io::Result<()> {
     Ok(())
 }
 
+fn clean_build() {
+    println!("Cleaning the previous build...");
+    match fs::remove_dir_all("payload") {
+        Ok(()) => println!("Successfully Deleted Previous Build!!"),
+        Err(_) => println!("No Previous Build Exist!!"),
+    };
+}
+
 fn main() {
     let cli = Cli::parse(); // parse command line arguments
 
     match &cli.command {
         Commands::Build(build_args) => {
             println!("Building the app....");
-            let _ = build_launcher(&build_args).expect("Failed to build!!");
-        }
+            let _ = build_launcher(&build_args).expect("Failed to build a launcher!!");
+        },
+        Commands::Clean => {
+            clean_build();
+        },
         Commands::Quit => {
-            println!("Quit...");
+            println!("Quiting...");
         }
     }
 }
