@@ -73,32 +73,32 @@ fn collect_source_files(source_dir: &Path) -> io::Result<Vec<SourceFile>> {
         .into_iter()
         .filter_map(|e| e.ok())
     {
-        if entry.file_type().is_file() {
-            if should_include_file(
+        if entry.file_type().is_file()
+            && should_include_file(
                 entry.path(),
                 &source_dir,
                 &include_patterns,
                 &exclude_patterns,
-            ) {
-                let relative_path = entry
-                    .path()
-                    .strip_prefix(&source_dir)
-                    .unwrap()
-                    .to_path_buf();
+            )
+        {
+            let relative_path = entry
+                .path()
+                .strip_prefix(&source_dir)
+                .unwrap()
+                .to_path_buf();
 
-                if seen_paths.contains(&relative_path) {
-                    // eprintln!("Warning: Skipping duplicate file: {:?}", relative_path);
-                    continue;
-                }
-
-                // println!("Found source file: {:?}", relative_path);
-                seen_paths.insert(relative_path.clone());
-                let content = fs::read(entry.path())?;
-                files.push(SourceFile {
-                    relative_path,
-                    content,
-                });
+            if seen_paths.contains(&relative_path) {
+                // eprintln!("Warning: Skipping duplicate file: {:?}", relative_path);
+                continue;
             }
+
+            // println!("Found source file: {:?}", relative_path);
+            seen_paths.insert(relative_path.clone());
+            let content = fs::read(entry.path())?;
+            files.push(SourceFile {
+                relative_path,
+                content,
+            });
         }
     }
     Ok(files)
