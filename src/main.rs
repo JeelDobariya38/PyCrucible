@@ -198,7 +198,7 @@ fn main() {
             clean_build();
         },
         Commands::Quit => {
-            println!("Quiting...");
+            println!("Quiting the app...");
         }
     }
 }
