@@ -24,9 +24,15 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    Check(CheckArgs),
     Build(BuildArgs),
     Clean,
     Quit,
+}
+
+#[derive(Args, Debug)]
+pub struct CheckArgs {
+    pub source_dir: PathBuf,
 }
 
 #[derive(Args, Debug)]

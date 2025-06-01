@@ -5,7 +5,7 @@ mod uv_handler;
 
 use crate::launcher::config::load_project_config;
 use clap::Parser;
-use cli::{Cli, Commands, BuildArgs};
+use cli::{Cli, Commands, CheckArgs, BuildArgs};
 use glob::Pattern;
 use spinner_utils::{create_spinner_with_message, stop_and_persist_spinner_with_message};
 use std::collections::HashSet;
@@ -165,6 +165,16 @@ fn build_launcher(cli: &BuildArgs) -> io::Result<()> {
     Ok(())
 }
 
+fn check_compatibility(check_args: &CheckArgs) {
+    let mut path: PathBuf = check_args.source_dir.clone();
+    path.push("uv.lock");
+
+    match path.canonicalize() {
+        Ok(_) => println!("You are good to go!!!"),
+        Err(_) => println!("Project is not compatibility!!!"),
+    };
+}
+
 fn clean_build() {
     println!("Cleaning the previous build...");
     match fs::remove_dir_all("payload") {
@@ -177,9 +187,12 @@ fn main() {
     let cli = Cli::parse(); // parse command line arguments
 
     match &cli.command {
+        Commands::Check(check_args) => {
+            check_compatibility(check_args);
+        }
         Commands::Build(build_args) => {
             println!("Building the app....");
-            let _ = build_launcher(&build_args).expect("Failed to build a launcher!!");
+            let _ = build_launcher(build_args).expect("Failed to build a launcher!!");
         },
         Commands::Clean => {
             clean_build();
