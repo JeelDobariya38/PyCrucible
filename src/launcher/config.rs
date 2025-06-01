@@ -98,11 +98,10 @@ fn load_config(config_path: &PathBuf) -> ProjectConfig {
 
 pub fn load_project_config(source_dir: &PathBuf) -> ProjectConfig {
     // Load config with default Python-specific patterns
-    let project_config = match source_dir.join("pycrucible.toml").canonicalize() {
+    match source_dir.join("pycrucible.toml").canonicalize() {
         Ok(config_path) if config_path.exists() => load_config(&config_path),
         _ => ProjectConfig::default(),
-    };
-    project_config
+    }
 }
 
 #[cfg(test)]

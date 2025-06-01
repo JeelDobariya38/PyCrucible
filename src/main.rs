@@ -5,7 +5,7 @@ mod uv_handler;
 
 use crate::launcher::config::load_project_config;
 use clap::Parser;
-use cli::Cli;
+use cli::{Cli, Commands, CheckArgs, BuildArgs};
 use glob::Pattern;
 use spinner_utils::{create_spinner_with_message, stop_and_persist_spinner_with_message};
 use std::collections::HashSet;
@@ -73,40 +73,38 @@ fn collect_source_files(source_dir: &Path) -> io::Result<Vec<SourceFile>> {
         .into_iter()
         .filter_map(|e| e.ok())
     {
-        if entry.file_type().is_file() {
-            if should_include_file(
+        if entry.file_type().is_file()
+            && should_include_file(
                 entry.path(),
                 &source_dir,
                 &include_patterns,
                 &exclude_patterns,
-            ) {
-                let relative_path = entry
-                    .path()
-                    .strip_prefix(&source_dir)
-                    .unwrap()
-                    .to_path_buf();
+            )
+        {
+            let relative_path = entry
+                .path()
+                .strip_prefix(&source_dir)
+                .unwrap()
+                .to_path_buf();
 
-                if seen_paths.contains(&relative_path) {
-                    // eprintln!("Warning: Skipping duplicate file: {:?}", relative_path);
-                    continue;
-                }
-
-                // println!("Found source file: {:?}", relative_path);
-                seen_paths.insert(relative_path.clone());
-                let content = fs::read(entry.path())?;
-                files.push(SourceFile {
-                    relative_path,
-                    content,
-                });
+            if seen_paths.contains(&relative_path) {
+                // eprintln!("Warning: Skipping duplicate file: {:?}", relative_path);
+                continue;
             }
+
+            // println!("Found source file: {:?}", relative_path);
+            seen_paths.insert(relative_path.clone());
+            let content = fs::read(entry.path())?;
+            files.push(SourceFile {
+                relative_path,
+                content,
+            });
         }
     }
     Ok(files)
 }
 
-fn main() -> io::Result<()> {
-    let cli = Cli::parse(); // parse command line arguments
-
+fn build_launcher(cli: &BuildArgs) -> io::Result<()> {
     // Collect source files
     let sp = create_spinner_with_message("Collecting source files ...");
     let source_files = collect_source_files(&cli.source_dir)?;
@@ -159,10 +157,48 @@ fn main() -> io::Result<()> {
         manifest: fs::read(manifest_path)?,
         uv_binary: fs::read(&uv_path)?,
         output_path: cli.output_path.to_string_lossy().to_string(),
-        cross: cli.target,
+        cross: cli.target.clone(),
     };
 
     let generator = LauncherGenerator::new(config);
     generator.generate_and_compile()?;
     Ok(())
+}
+
+fn check_compatibility(check_args: &CheckArgs) {
+    let mut path: PathBuf = check_args.source_dir.clone();
+    path.push("uv.lock");
+
+    match path.canonicalize() {
+        Ok(_) => println!("You are good to go!!!"),
+        Err(_) => println!("Project is not compatibility!!!"),
+    };
+}
+
+fn clean_build() {
+    println!("Cleaning the previous build...");
+    match fs::remove_dir_all("payload") {
+        Ok(()) => println!("Successfully Deleted Previous Build!!"),
+        Err(_) => println!("No Previous Build Exist!!"),
+    };
+}
+
+fn main() {
+    let cli = Cli::parse(); // parse command line arguments
+
+    match &cli.command {
+        Commands::Check(check_args) => {
+            check_compatibility(check_args);
+        }
+        Commands::Build(build_args) => {
+            println!("Building the app....");
+            let _ = build_launcher(build_args).expect("Failed to build a launcher!!");
+        },
+        Commands::Clean => {
+            clean_build();
+        },
+        Commands::Quit => {
+            println!("Quiting...");
+        }
+    }
 }

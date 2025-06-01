@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use std::env;
 use std::path::PathBuf;
 
@@ -18,6 +18,25 @@ fn get_version() -> &'static str {
 #[derive(Parser, Debug)]
 #[command(author = AUTHOR, version = get_version(), about = ABOUT, long_about = None)]
 pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Commands {
+    Check(CheckArgs),
+    Build(BuildArgs),
+    Clean,
+    Quit,
+}
+
+#[derive(Args, Debug)]
+pub struct CheckArgs {
+    pub source_dir: PathBuf,
+}
+
+#[derive(Args, Debug)]
+pub struct BuildArgs {
     pub source_dir: PathBuf,
 
     #[arg(short = 'B', long)]
