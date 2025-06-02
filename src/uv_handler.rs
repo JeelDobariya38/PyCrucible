@@ -90,6 +90,7 @@ pub fn download_binary_and_unpack(
 
     // Download the file
     let response = reqwest::blocking::get(&url)?;
+
     let mut dest = File::create(&file_path)?;
     let bytes = response.bytes()?;
     let mut content = bytes.as_ref();
