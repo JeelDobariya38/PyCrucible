@@ -1,0 +1,70 @@
+name: Rust CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test Rust Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Run Rust tests
+        run: cargo test --verbose
+
+  build:
+    name: Build Rust Code on ${{ matrix.os }}
+
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build Rust project (Release)
+        run: cargo build --release
+
+      - name: Determine artifact path and executable name
+        id: artifact_info
+        shell: bash
+        run: |
+          PROJECT_NAME=pycrucible
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo "artifact_path=target/release/${PROJECT_NAME}.exe" >> $GITHUB_OUTPUT
+            echo "artifact_name=rust-build-windows" >> $GITHUB_OUTPUT
+          else
+            echo "artifact_path=target/release/${PROJECT_NAME}" >> $GITHUB_OUTPUT
+            echo "artifact_name=rust-build-ubuntu" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact_info.outputs.artifact_name }}
+          path: ${{ steps.artifact_info.outputs.artifact_path }}
